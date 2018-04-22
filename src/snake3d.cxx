@@ -128,6 +128,27 @@ createScene( )
   Ogre::Entity* floor = this->m_SceneMgr->createEntity( "floor", "plane" );
   floor->setMaterialName( "Mat" );
   this->m_SceneMgr->getRootSceneNode( )->attachObject( floor );
+
+// Load model entity
+  Ogre::Entity* snake_head =
+    this->m_SceneMgr->createEntity(
+      "snake_head", "snake_head.mesh"
+      );
+  snake_head->setCastShadows( true );
+  Ogre::AxisAlignedBox bbox = snake_head->getBoundingBox( );
+
+  // Associate it to a node
+  Ogre::SceneNode* snake_head_node =
+    this->m_SceneMgr->getRootSceneNode( )->createChildSceneNode(
+      "snake_head_node"
+      );
+  snake_head_node->attachObject( snake_head );
+  snake_head_node->translate( 0, -bbox.getMinimum( )[ 1 ], 0 );
+
+ /* // Prepare skeleton to be manually controlled
+  Ogre::SkeletonInstance* snake_head_skel = snake_head->getSkeleton( );
+  for( unsigned int bIt = 0; bIt < snake_head_skel->getNumBones( ); bIt++ )
+    snake_head_skel->getBone( bIt )->setManuallyControlled( true );*/
 }
 
 // -------------------------------------------------------------------------
