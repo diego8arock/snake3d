@@ -9,6 +9,9 @@
 #include <OgreSceneManager.h>
 #include <OgreSceneNode.h>
 #include <OgreSkeletonInstance.h>
+#include <OgreVector3.h>
+#include <OgreLogManager.h>
+#include <OgreStringConverter.h>
 
 /**
  */
@@ -23,10 +26,17 @@ protected:
   virtual void createCamera( ) override;
   virtual void createScene( ) override;
   virtual bool frameRenderingQueued( const Ogre::FrameEvent& evt ) override;
+  virtual bool keyPressed( const OIS::KeyEvent& arg ) override;
   void createAnimations( );
 
 protected:
   Ogre::AnimationState* m_AnimationState;
+  int timeDelay =0;
+  int timeDelayMax = 150;
+  float snake_velocity = 1;
+  int game_difficulty = 0;
+  bool right_press = false;
+  bool left_press = false;
 };
 
 // -------------------------------------------------------------------------
@@ -75,6 +85,15 @@ Snake3d::
 Snake3d( )
   : pujOgre::Application( )
 {
+  if(game_difficulty==0){
+    snake_velocity = 1;
+    timeDelayMax = 10;
+  }else{
+    if(game_difficulty==1){
+     snake_velocity = 2;
+     timeDelayMax = 9;
+    }
+  }
 }
 
 // -------------------------------------------------------------------------
@@ -155,13 +174,55 @@ createScene( )
 bool Snake3d::
 frameRenderingQueued( const Ogre::FrameEvent& evt )
 {
-  if( this->pujOgre::Application::frameRenderingQueued( evt ) )
-  {
-    return( true );
+  Ogre::SceneNode* snake_head_node =
+  this->m_SceneMgr->getSceneNode("snake_head_node");
+  
+  if(timeDelay>timeDelayMax){
+    timeDelay = 0;
   }
-  else
-    return( false );
+  
+  if(timeDelay==0){
+    if(right_press){
+      snake_head_node->translate( snake_head_node->getPosition().x-snake_velocity, 0, snake_head_node->getPosition().z-snake_velocity);    
+    }else{
+      if(left_press){
+	snake_head_node->translate( snake_head_node->getPosition().x, 0, snake_head_node->getPosition().z-snake_velocity);    
+      }else{
+	snake_head_node->translate( snake_head_node->getPosition().x-snake_velocity, 0, snake_head_node->getPosition().z);    
+      }
+    }
+    
+    //No more press
+    right_press = false;
+    left_press = false;
+      
+  Ogre::LogManager::getSingletonPtr( )->
+    logMessage( "x: " + Ogre::StringConverter::toString(snake_head_node->getPosition().x) + " y: " + Ogre::StringConverter::toString(snake_head_node->getPosition().y) + " z: " + Ogre::StringConverter::toString(snake_head_node->getPosition().z));
+  }
+  timeDelay = timeDelay + 1;
+//   if( this->pujOgre::Application::frameRenderingQueued( evt ) )
+//   {
+//     return( true );
+//   }
+//   else
+//     return( false );
+  return( true );
 }
-
+bool Snake3d::
+keyPressed( const OIS::KeyEvent& arg )
+{
+  Ogre::LogManager::getSingletonPtr( )->
+  logMessage("pressed");
+  if(arg.key == OIS::KC_RIGHT){
+  Ogre::LogManager::getSingletonPtr( )->
+    logMessage("Right pressed");
+    right_press = true;
+  }
+  if(arg.key == OIS::KC_LEFT){
+  Ogre::LogManager::getSingletonPtr( )->
+    logMessage("Left pressed");
+    left_press = true;
+  }
+}
 
 // eof - $RCSfile$
