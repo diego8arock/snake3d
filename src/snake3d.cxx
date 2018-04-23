@@ -38,6 +38,10 @@ protected:
   int game_difficulty = 0;
   bool right_press = false;
   bool left_press = false;
+  
+  //Movement
+  float degree_right=-5;
+  float degree_left=5;
 };
 
 // -------------------------------------------------------------------------
@@ -88,11 +92,15 @@ Snake3d( )
 {
   if(game_difficulty==0){
     snake_velocity = 1;
-    timeDelayMax = 10;
+    timeDelayMax = 2;
+    degree_right = -10;
+    degree_left = 10;
   }else{
     if(game_difficulty==1){
-     snake_velocity = 2;
+     snake_velocity = 1;
      timeDelayMax = 9;
+     degree_right = -15;
+    degree_left = 15;
     }
   }
 }
@@ -193,33 +201,24 @@ frameRenderingQueued( const Ogre::FrameEvent& evt )
   }
   
   if(timeDelay==0){
+    Ogre::Vector3 direction = snake_head_node->getOrientation() * Ogre::Vector3::NEGATIVE_UNIT_Z;
     if(right_press){
-      snake_head_node->setPosition( snake_head_node->getPosition().x, snake_head_node->getPosition().y, snake_head_node->getPosition().z-snake_velocity);    
-      snake_head_node->yaw(Ogre::Radian(-0.1));
-      
-      snake_cam_node->setPosition( snake_cam_node->getPosition().x, snake_cam_node->getPosition().y, snake_cam_node->getPosition().z-snake_velocity);    
-      snake_cam_node->yaw(Ogre::Radian(-0.1));
-      
+      snake_head_node->rotate(Ogre::Quaternion( Ogre::Degree( degree_right ), Ogre::Vector3::UNIT_Y ));
+      //snake_cam_node->rotate(Ogre::Quaternion( Ogre::Degree( degree_right ), Ogre::Vector3::UNIT_Y ));
+      direction = snake_head_node->getOrientation() * Ogre::Vector3::NEGATIVE_UNIT_Z;
     }else{
       if(left_press){
-	snake_head_node->setPosition( snake_head_node->getPosition().x-snake_velocity, snake_head_node->getPosition().y, snake_head_node->getPosition().z);  
-	snake_head_node->yaw(Ogre::Radian(0.1));
-	
-	snake_cam_node->setPosition( snake_cam_node->getPosition().x-snake_velocity, snake_cam_node->getPosition().y, snake_cam_node->getPosition().z);    
-	snake_cam_node->yaw(Ogre::Radian(0.1));
-      }else{
-	snake_head_node->setPosition( snake_head_node->getPosition().x-snake_velocity, snake_head_node->getPosition().y, snake_head_node->getPosition().z-snake_velocity);    
-	snake_cam_node->setPosition( snake_cam_node->getPosition().x-snake_velocity, snake_cam_node->getPosition().y, snake_cam_node->getPosition().z-snake_velocity);    
-	
+	snake_head_node->rotate(Ogre::Quaternion( Ogre::Degree( degree_left ), Ogre::Vector3::UNIT_Y ));
+	//snake_cam_node->rotate(Ogre::Quaternion( Ogre::Degree( degree_left ), Ogre::Vector3::UNIT_Y ));
+        direction = snake_head_node->getOrientation() * Ogre::Vector3::NEGATIVE_UNIT_Z;
       }
     }
-      
+    snake_head_node->translate(direction,Ogre::Node::TS_LOCAL);
+    //snake_cam_node->translate(direction,Ogre::Node::TS_LOCAL);
+    
   Ogre::LogManager::getSingletonPtr( )->
     logMessage( "x: " + Ogre::StringConverter::toString(snake_head_node->getPosition().x) + " y: " + Ogre::StringConverter::toString(snake_head_node->getPosition().y) + " z: " + Ogre::StringConverter::toString(snake_head_node->getPosition().z));
   }
-  //snake_cam_node->yaw(Ogre::Radian(0.1));
-  //snake_cam_node->roll(Ogre::Radian(0.1));
-	//snake_cam_node->pitch(Ogre::Radian(0.1));
   timeDelay = timeDelay + 1;
 //   if( this->pujOgre::Application::frameRenderingQueued( evt ) )
 //   {
@@ -235,16 +234,10 @@ frameRenderingQueued( const Ogre::FrameEvent& evt )
 bool Snake3d::
 keyPressed( const OIS::KeyEvent& arg )
 {
-  Ogre::LogManager::getSingletonPtr( )->
-  logMessage("pressed");
   if(arg.key == OIS::KC_RIGHT){
-  Ogre::LogManager::getSingletonPtr( )->
-    logMessage("Right pressed");
     right_press = true;
   }
   if(arg.key == OIS::KC_LEFT){
-  Ogre::LogManager::getSingletonPtr( )->
-    logMessage("Left pressed");
     left_press = true;
   }
 }
