@@ -27,6 +27,7 @@ protected:
   virtual void createScene( ) override;
   virtual bool frameRenderingQueued( const Ogre::FrameEvent& evt ) override;
   virtual bool keyPressed( const OIS::KeyEvent& arg ) override;
+  virtual bool keyReleased( const OIS::KeyEvent& arg ) override;
   void createAnimations( );
 
 protected:
@@ -161,6 +162,14 @@ createScene( )
     this->m_SceneMgr->getRootSceneNode( )->createChildSceneNode(
       "snake_head_node"
       );
+    
+  Ogre::SceneNode* snake_cam_node =
+  this->m_SceneMgr->getSceneNode("MainCamNode");
+ 
+  snake_cam_node->translate( 0, -bbox.getMinimum( )[ 1 ], 0 );
+  snake_cam_node->setPosition(3,0,3);
+  this->m_Camera->lookAt(Ogre::Vector3( 0, 0, 0 ));
+  
   snake_head_node->attachObject( snake_head );
   snake_head_node->translate( 0, -bbox.getMinimum( )[ 1 ], 0 );
 
@@ -176,6 +185,8 @@ frameRenderingQueued( const Ogre::FrameEvent& evt )
 {
   Ogre::SceneNode* snake_head_node =
   this->m_SceneMgr->getSceneNode("snake_head_node");
+  Ogre::SceneNode* snake_cam_node =
+  this->m_SceneMgr->getSceneNode("MainCamNode");
   
   if(timeDelay>timeDelayMax){
     timeDelay = 0;
@@ -183,22 +194,25 @@ frameRenderingQueued( const Ogre::FrameEvent& evt )
   
   if(timeDelay==0){
     if(right_press){
-      snake_head_node->translate( snake_head_node->getPosition().x-snake_velocity, 0, snake_head_node->getPosition().z-snake_velocity);    
+      snake_head_node->setPosition( snake_head_node->getPosition().x, snake_head_node->getPosition().y, snake_head_node->getPosition().z-snake_velocity);    
+      snake_cam_node->setPosition( snake_cam_node->getPosition().x, snake_cam_node->getPosition().y, snake_cam_node->getPosition().z-snake_velocity);    
     }else{
       if(left_press){
-	snake_head_node->translate( snake_head_node->getPosition().x, 0, snake_head_node->getPosition().z-snake_velocity);    
+	snake_head_node->setPosition( snake_head_node->getPosition().x-snake_velocity, snake_head_node->getPosition().y, snake_head_node->getPosition().z);  
+	snake_cam_node->setPosition( snake_cam_node->getPosition().x-snake_velocity, snake_cam_node->getPosition().y, snake_cam_node->getPosition().z);    
       }else{
-	snake_head_node->translate( snake_head_node->getPosition().x-snake_velocity, 0, snake_head_node->getPosition().z);    
+	snake_head_node->setPosition( snake_head_node->getPosition().x-snake_velocity, snake_head_node->getPosition().y, snake_head_node->getPosition().z-snake_velocity);    
+	snake_cam_node->setPosition( snake_cam_node->getPosition().x-snake_velocity, snake_cam_node->getPosition().y, snake_cam_node->getPosition().z-snake_velocity);    
+	
       }
     }
-    
-    //No more press
-    right_press = false;
-    left_press = false;
       
   Ogre::LogManager::getSingletonPtr( )->
     logMessage( "x: " + Ogre::StringConverter::toString(snake_head_node->getPosition().x) + " y: " + Ogre::StringConverter::toString(snake_head_node->getPosition().y) + " z: " + Ogre::StringConverter::toString(snake_head_node->getPosition().z));
   }
+  //snake_cam_node->yaw(Ogre::Radian(0.1));
+  //snake_cam_node->roll(Ogre::Radian(0.1));
+	//snake_cam_node->pitch(Ogre::Radian(0.1));
   timeDelay = timeDelay + 1;
 //   if( this->pujOgre::Application::frameRenderingQueued( evt ) )
 //   {
@@ -206,6 +220,9 @@ frameRenderingQueued( const Ogre::FrameEvent& evt )
 //   }
 //   else
 //     return( false );
+  //CAPTURES
+  this->m_Keyboard->capture();
+  
   return( true );
 }
 bool Snake3d::
@@ -223,6 +240,12 @@ keyPressed( const OIS::KeyEvent& arg )
     logMessage("Left pressed");
     left_press = true;
   }
+}
+bool Snake3d::
+keyReleased( const OIS::KeyEvent& arg )
+{
+    right_press = false;
+    left_press = false;
 }
 
 // eof - $RCSfile$
