@@ -195,11 +195,18 @@ frameRenderingQueued( const Ogre::FrameEvent& evt )
   if(timeDelay==0){
     if(right_press){
       snake_head_node->setPosition( snake_head_node->getPosition().x, snake_head_node->getPosition().y, snake_head_node->getPosition().z-snake_velocity);    
+      snake_head_node->yaw(Ogre::Radian(-0.1));
+      
       snake_cam_node->setPosition( snake_cam_node->getPosition().x, snake_cam_node->getPosition().y, snake_cam_node->getPosition().z-snake_velocity);    
+      snake_cam_node->yaw(Ogre::Radian(-0.1));
+      
     }else{
       if(left_press){
 	snake_head_node->setPosition( snake_head_node->getPosition().x-snake_velocity, snake_head_node->getPosition().y, snake_head_node->getPosition().z);  
+	snake_head_node->yaw(Ogre::Radian(0.1));
+	
 	snake_cam_node->setPosition( snake_cam_node->getPosition().x-snake_velocity, snake_cam_node->getPosition().y, snake_cam_node->getPosition().z);    
+	snake_cam_node->yaw(Ogre::Radian(0.1));
       }else{
 	snake_head_node->setPosition( snake_head_node->getPosition().x-snake_velocity, snake_head_node->getPosition().y, snake_head_node->getPosition().z-snake_velocity);    
 	snake_cam_node->setPosition( snake_cam_node->getPosition().x-snake_velocity, snake_cam_node->getPosition().y, snake_cam_node->getPosition().z-snake_velocity);    
