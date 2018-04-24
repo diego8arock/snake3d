@@ -162,7 +162,7 @@ createScene( )
     this->m_SceneMgr->getRootSceneNode( )->createChildSceneNode(
       "snake_head_node"
       );
-    
+
   Ogre::SceneNode* snake_cam_node =
   this->m_SceneMgr->getSceneNode("MainCamNode");
  
@@ -172,6 +172,21 @@ createScene( )
   
   snake_head_node->attachObject( snake_head );
   snake_head_node->translate( 0, -bbox.getMinimum( )[ 1 ], 0 );
+
+  Ogre::Entity* apple =
+    this->m_SceneMgr->createEntity(
+      "apple", "apple.mesh"
+      );
+  apple->setCastShadows( true );
+  Ogre::AxisAlignedBox apple_bbox = apple->getBoundingBox( );
+  
+  Ogre::SceneNode* apple_node =
+    this->m_SceneMgr->getRootSceneNode( )->createChildSceneNode(
+      "apple_node"
+      );    
+
+  apple_node->attachObject( apple );
+  apple_node->translate( 0, -bbox.getMinimum( )[ 1 ], -50 );
 
  /* // Prepare skeleton to be manually controlled
   Ogre::SkeletonInstance* snake_head_skel = snake_head->getSkeleton( );
