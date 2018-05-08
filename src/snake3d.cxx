@@ -1,6 +1,7 @@
 #include <iostream>
 #include <pujOgre/Application.h>
 #include <pujOgre/Player.h>
+#include <pujOgre/Snake.h>
 
 #include <OgreBone.h>
 #include <OgreCamera.h>
@@ -14,7 +15,6 @@
 #include <OgreLogManager.h>
 #include <OgreStringConverter.h>
 #include <OgreRay.h>
-
 
 /**
  */
@@ -36,6 +36,8 @@ protected:
 protected:
   pujOgre::Player player;
   Ogre::AnimationState* m_AnimationState;
+  snake3d::Snake* mSnake;
+  
   int timeDelay =0;
   int timeDelayMax = 150;
   float snake_velocity = 1;
@@ -93,8 +95,7 @@ extern "C"
 #endif // __cplusplus
 
 // -------------------------------------------------------------------------
-Snake3d::
-Snake3d( )
+Snake3d::Snake3d()
   : pujOgre::Application( )
 {
   if(game_difficulty==0){
@@ -113,24 +114,21 @@ Snake3d( )
 }
 
 // -------------------------------------------------------------------------
-Snake3d::
-~Snake3d( )
+Snake3d::~Snake3d( )
 {
 }
 
 // -------------------------------------------------------------------------
-void Snake3d::
-createCamera( )
+void Snake3d::createCamera( )
 {
-  this->pujOgre::Application::createCamera( );
-  this->m_Camera->setPosition( Ogre::Vector3( 25, 25, 25 ) );
-  this->m_Camera->lookAt( Ogre::Vector3( 0, 10, 0 ) );
-  this->m_Camera->setNearClipDistance( 5 );
+        this->pujOgre::Application::createCamera( );
+        this->m_Camera->setPosition( Ogre::Vector3( 25, 25, 25 ) );
+        this->m_Camera->lookAt( Ogre::Vector3( 0, 10, 0 ) );
+        this->m_Camera->setNearClipDistance( 5 );
 }
 
 // -------------------------------------------------------------------------
-void Snake3d::
-createScene( )
+void Snake3d::createScene( )
 {
   // Lights
   this->m_SceneMgr->setAmbientLight( Ogre::ColourValue( 1, 1, 1 ) );
@@ -165,30 +163,29 @@ createScene( )
   this->m_SceneMgr->getRootSceneNode( )->attachObject( floor );
 
 // Load model entity
-  Ogre::Entity* snake_head =
-    this->m_SceneMgr->createEntity(
-      "snake_head", "snake_head.mesh"
-      );
-  snake_head->setCastShadows( true );
-  Ogre::AxisAlignedBox bbox = snake_head->getBoundingBox( );
-
-  // Associate it to a node
-  Ogre::SceneNode* snake_head_node =
-    this->m_SceneMgr->getRootSceneNode( )->createChildSceneNode(
-      "snake_head_node"
-      );
-
-  Ogre::SceneNode* snake_cam_node =
-  this->m_SceneMgr->getSceneNode("MainCamNode");
+//   Ogre::Entity* snake_head =
+//     this->m_SceneMgr->createEntity(
+//       "snake_head", "snake_head.mesh"
+//       );
+//   snake_head->setCastShadows( true );
+//   Ogre::AxisAlignedBox bbox = snake_head->getBoundingBox( );
+// 
+//   // Associate it to a node
+//   Ogre::SceneNode* snake_head_node =
+//     this->m_SceneMgr->getRootSceneNode( )->createChildSceneNode(
+//       "snake_head_node"
+//       );
+// 
+//   Ogre::SceneNode* snake_cam_node =  this->m_SceneMgr->getSceneNode("MainCamNode");
  
-  Ogre::Vector3 direction = snake_head_node->getOrientation() * Ogre::Vector3::NEGATIVE_UNIT_Z;
+//   Ogre::Vector3 direction = snake_head_node->getOrientation() * Ogre::Vector3::NEGATIVE_UNIT_Z;
   
-  snake_cam_node->translate( direction.x, 0, direction.z );
+//   snake_cam_node->translate( direction.x, 0, direction.z );
   //snake_cam_node->setPosition(30,30,30);
-  this->m_Camera->lookAt(Ogre::Vector3( 0, 0, 252 ));
+  //this->m_Camera->lookAt(Ogre::Vector3( 0, 0, 252 ));
   
-  snake_head_node->attachObject( snake_head );
-  snake_head_node->translate( 0, -bbox.getMinimum( )[ 1 ], 0 );
+//   snake_head_node->attachObject( snake_head );
+//   snake_head_node->translate( 0, -bbox.getMinimum( )[ 1 ], 0 );
 
   Ogre::Entity* apple =
     this->m_SceneMgr->createEntity(
@@ -199,15 +196,20 @@ createScene( )
   
   mesh_apple_lenght = apple_bbox.getMaximum().x-apple_bbox.getMinimum().x;
   
-  Ogre::SceneNode* apple_node =
-    this->m_SceneMgr->getRootSceneNode( )->createChildSceneNode(
+  Ogre::SceneNode* apple_node = this->m_SceneMgr->getRootSceneNode( )->createChildSceneNode(
       "apple_node"
       );    
   num_apple_inScene = 1;
   apple_node->scale(Ogre::Vector3(0.5,0.5,0.5));
   apple_node->attachObject( apple );
-  apple_node->translate( 0, -bbox.getMinimum( )[ 1 ], -20 );
+//   apple_node->translate( 0, -bbox.getMinimum( )[ 1 ], -20 );
 
+  mSnake = new snake3d::Snake(this->m_SceneMgr,true);
+  
+  //Creo 50 vertebras adicionales a la cabeza.
+  for(int i=0; i<50; i++)
+          mSnake->addNewVerteb(); //Este metodo se debe ir llamando cada vez que me coma una manzana en el juego.
+  
  /* // Prepare skeleton to be manually controlled
   Ogre::SkeletonInstance* snake_head_skel = snake_head->getSkeleton( );
   for( unsigned int bIt = 0; bIt < snake_head_skel->getNumBones( ); bIt++ )
@@ -215,43 +217,41 @@ createScene( )
 }
 
 // -------------------------------------------------------------------------
-bool Snake3d::
-frameRenderingQueued( const Ogre::FrameEvent& evt )
+bool Snake3d::frameRenderingQueued( const Ogre::FrameEvent& evt )
 {
   //Nodes in scene
-  Ogre::SceneNode* snake_head_node =
-  this->m_SceneMgr->getSceneNode("snake_head_node");
-  Ogre::SceneNode* snake_cam_node =
-  this->m_SceneMgr->getSceneNode("MainCamNode");
+//   Ogre::SceneNode* snake_head_node = this->m_SceneMgr->getSceneNode("snake_head_node");
+//   Ogre::SceneNode* snake_cam_node =
+//   this->m_SceneMgr->getSceneNode("MainCamNode");
   
   //actual direction
-  Ogre::Vector3 direction = snake_head_node->getOrientation() * Ogre::Vector3::NEGATIVE_UNIT_Z;
+//   Ogre::Vector3 direction = snake_head_node->getOrientation() * Ogre::Vector3::NEGATIVE_UNIT_Z;
   
   bool isCollision = false;
   
   //RAY TO CHECK COLLISION
-  if(num_apple_inScene>1){
-    Ogre::SceneNode* apple_node =
-  this->m_SceneMgr->getSceneNode("apple_node");
-    Ogre::Vector3 snake_pos = snake_head_node->getPosition();
-    Ogre::Ray snake_ray(Ogre::Vector3(snake_pos.x,1,snake_pos.z),direction);
+//   if(num_apple_inScene>1){
+//     Ogre::SceneNode* apple_node =
+//   this->m_SceneMgr->getSceneNode("apple_node");
+//     Ogre::Vector3 snake_pos = snake_head_node->getPosition();
+//     Ogre::Ray snake_ray(Ogre::Vector3(snake_pos.x,1,snake_pos.z),direction);
     
-    Ogre::RaySceneQuery* rayQuery = this->m_SceneMgr->createRayQuery(snake_ray);
+//     Ogre::RaySceneQuery* rayQuery = this->m_SceneMgr->createRayQuery(snake_ray);
     
-    Ogre::RaySceneQueryResult &result = rayQuery->execute();
+//     Ogre::RaySceneQueryResult &result = rayQuery->execute();
     
-    Ogre::RaySceneQueryResult::iterator itr;
+//     Ogre::RaySceneQueryResult::iterator itr;
     
-    for (itr = result.begin(); itr != result.end(); itr++) {
-	Ogre::LogManager::getSingletonPtr( )->
-    logMessage("Name: " + itr->movable->getName());
-        if (itr->movable->getName().compare("apple")!=0) {
-            isCollision= true;
-        }
-    }
-  }
+//     for (itr = result.begin(); itr != result.end(); itr++) {
+// 	Ogre::LogManager::getSingletonPtr( )->
+//     logMessage("Name: " + itr->movable->getName());
+//         if (itr->movable->getName().compare("apple")!=0) {
+//             isCollision= true;
+//         }
+//     }
+//   }
   if(isCollision){
-    Ogre::LogManager::getSingletonPtr( )->
+    Ogre::LogManager::getSingletonPtr()->
     logMessage("COLLISION!!");
   }
   
@@ -261,22 +261,24 @@ frameRenderingQueued( const Ogre::FrameEvent& evt )
   
   //SNAKE MOVEMENT
   if(timeDelay==0){
-    if(right_press){
-      snake_head_node->rotate(Ogre::Quaternion( Ogre::Degree( degree_right ), Ogre::Vector3::UNIT_Y ));
-      //snake_cam_node->rotate(Ogre::Quaternion( Ogre::Degree( degree_right ), Ogre::Vector3::UNIT_Y ));
-      direction = snake_head_node->getOrientation() * Ogre::Vector3::NEGATIVE_UNIT_Z;
-    }else{
-      if(left_press){
-	snake_head_node->rotate(Ogre::Quaternion( Ogre::Degree( degree_left ), Ogre::Vector3::UNIT_Y ));
-	//snake_cam_node->rotate(Ogre::Quaternion( Ogre::Degree( degree_left ), Ogre::Vector3::UNIT_Y ));
-        direction = snake_head_node->getOrientation() * Ogre::Vector3::NEGATIVE_UNIT_Z;
-      }
-    }
-    snake_head_node->translate(direction,Ogre::Node::TS_LOCAL);
+          mSnake->draw();
+          
+//     if(right_press){
+//       snake_head_node->rotate(Ogre::Quaternion( Ogre::Degree( degree_right ), Ogre::Vector3::UNIT_Y ));
+//       //snake_cam_node->rotate(Ogre::Quaternion( Ogre::Degree( degree_right ), Ogre::Vector3::UNIT_Y ));
+//       direction = snake_head_node->getOrientation() * Ogre::Vector3::NEGATIVE_UNIT_Z;
+//     }else{
+//       if(left_press){
+// 	snake_head_node->rotate(Ogre::Quaternion( Ogre::Degree( degree_left ), Ogre::Vector3::UNIT_Y ));
+// 	//snake_cam_node->rotate(Ogre::Quaternion( Ogre::Degree( degree_left ), Ogre::Vector3::UNIT_Y ));
+//         direction = snake_head_node->getOrientation() * Ogre::Vector3::NEGATIVE_UNIT_Z;
+//       }
+//     }
+//     snake_head_node->translate(direction,Ogre::Node::TS_LOCAL);
     //snake_cam_node->translate(direction,Ogre::Node::TS_LOCAL);
     
-  Ogre::LogManager::getSingletonPtr( )->
-    logMessage( "x: " + Ogre::StringConverter::toString(snake_head_node->getPosition().x) + " y: " + Ogre::StringConverter::toString(snake_head_node->getPosition().y) + " z: " + Ogre::StringConverter::toString(snake_head_node->getPosition().z));
+//   Ogre::LogManager::getSingletonPtr( )->
+//     logMessage( "x: " + Ogre::StringConverter::toString(snake_head_node->getPosition().x) + " y: " + Ogre::StringConverter::toString(snake_head_node->getPosition().y) + " z: " + Ogre::StringConverter::toString(snake_head_node->getPosition().z));
   }
   timeDelay = timeDelay + 1;
 //   if( this->pujOgre::Application::frameRenderingQueued( evt ) )
@@ -290,18 +292,17 @@ frameRenderingQueued( const Ogre::FrameEvent& evt )
   
   return( true );
 }
-bool Snake3d::
-keyPressed( const OIS::KeyEvent& arg )
+bool Snake3d::keyPressed( const OIS::KeyEvent& arg )
 {
-  if(arg.key == OIS::KC_RIGHT){
-    right_press = true;
+  if(arg.key == OIS::KC_RIGHT) {
+    mSnake->moveRigth();
   }
-  if(arg.key == OIS::KC_LEFT){
-    left_press = true;
+  
+  if(arg.key == OIS::KC_LEFT) {
+    mSnake->moveLeft();
   }
 }
-bool Snake3d::
-keyReleased( const OIS::KeyEvent& arg )
+bool Snake3d::keyReleased( const OIS::KeyEvent& arg )
 {
     right_press = false;
     left_press = false;

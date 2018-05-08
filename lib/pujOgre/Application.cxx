@@ -228,7 +228,11 @@ bool pujOgre::Application::
 keyPressed( const OIS::KeyEvent& arg )
 {
   OgreBites::KeyboardEvent evt;
+#ifdef ARTURO_ENV
+  evt.type = SDL_KEYDOWN;
+#else
   evt.type = OgreBites::KEYDOWN;
+#endif
   evt.keysym.sym = arg.key;
   // evt.keysym.mod = arg.key;
   evt.repeat = 1;
@@ -241,7 +245,11 @@ bool pujOgre::Application::
 keyReleased( const OIS::KeyEvent& arg )
 {
   OgreBites::KeyboardEvent evt;
-  evt.type = OgreBites::KEYUP;
+  #ifdef ARTURO_ENV
+  evt.type = SDL_KEYUP;
+#else
+  evt.type = KEYUP;
+  #endif
   evt.keysym.sym = arg.key;
   // evt.keysym.mod = arg.key;
   evt.repeat = 1;

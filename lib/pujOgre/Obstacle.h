@@ -10,7 +10,7 @@ class Obstacle{
 public:
   Obstacle();
   Obstacle(std::string name);
-  Obstacle(std::string name,std::string meshFileName,std::string meshName, Ogre::SceneManager sceneMgr);
+  Obstacle(std::string name,std::string meshFileName,std::string meshName, Ogre::SceneManager* sceneMgr);
 private:
   Ogre::Entity* obstacle;
   std::string name;
