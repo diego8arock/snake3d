@@ -1,6 +1,10 @@
 #include <iostream>
 #include <pujOgre/Application.h>
 #include <pujOgre/Player.h>
+#include <pujOgre/Apple.h>
+#include <pujOgre/Level.h>
+#include <pujOgre/Obstacle.h>
+#include <pujOgre/Snake.h>
 
 #include <OgreBone.h>
 #include <OgreCamera.h>
@@ -42,6 +46,7 @@ protected:
   int game_difficulty = 0;
   bool right_press = false;
   bool left_press = false;
+  int initial_snake_bone;
   
   //Movement
   float degree_right=-5;
@@ -123,8 +128,8 @@ void Snake3d::
 createCamera( )
 {
   this->pujOgre::Application::createCamera( );
-  this->m_Camera->setPosition( Ogre::Vector3( 25, 25, 25 ) );
-  this->m_Camera->lookAt( Ogre::Vector3( 0, 10, 0 ) );
+  this->m_Camera->setPosition( Ogre::Vector3( 0, 0, 0 ) );
+  //this->m_Camera->lookAt( Ogre::Vector3( 0, 10, 0 ) );
   this->m_Camera->setNearClipDistance( 5 );
 }
 
@@ -177,19 +182,28 @@ createScene( )
     this->m_SceneMgr->getRootSceneNode( )->createChildSceneNode(
       "snake_head_node"
       );
-
+  
   Ogre::SceneNode* snake_cam_node =
   this->m_SceneMgr->getSceneNode("MainCamNode");
- 
-  Ogre::Vector3 direction = snake_head_node->getOrientation() * Ogre::Vector3::NEGATIVE_UNIT_Z;
   
-  snake_cam_node->translate( direction.x, 0, direction.z );
-  //snake_cam_node->setPosition(30,30,30);
-  this->m_Camera->lookAt(Ogre::Vector3( 0, 0, 252 ));
+  //snake_head_node->setPosition(30,30,30);
+  //this->m_Camera->lookAt(Ogre::Vector3( 0, 0, 252 ));
   
   snake_head_node->attachObject( snake_head );
   snake_head_node->translate( 0, -bbox.getMinimum( )[ 1 ], 0 );
-
+  
+  Ogre::Vector3 direction = snake_head_node->getOrientation() * Ogre::Vector3::NEGATIVE_UNIT_Z;
+  
+  //snake_cam_node->translate( direction.x, 0, direction.z );
+  snake_cam_node->detachObject(this->m_Camera);
+  snake_head_node->attachObject(this->m_Camera);
+  snake_head_node->translate( direction.x, 0, direction.z );
+  
+  direction = snake_head_node->getOrientation() * Ogre::Vector3::NEGATIVE_UNIT_Z;
+  
+  this->m_Camera->setPosition( Ogre::Vector3( direction.x, 0, direction.z + 30) );
+  this->m_Camera->lookAt(Ogre::Vector3( direction.x, direction.y, -direction.z ));
+  
   Ogre::Entity* apple =
     this->m_SceneMgr->createEntity(
       "apple", "apple.mesh"
@@ -263,20 +277,27 @@ frameRenderingQueued( const Ogre::FrameEvent& evt )
   if(timeDelay==0){
     if(right_press){
       snake_head_node->rotate(Ogre::Quaternion( Ogre::Degree( degree_right ), Ogre::Vector3::UNIT_Y ));
+      //this->m_Camera->rotate(Ogre::Quaternion( Ogre::Degree( degree_right ), Ogre::Vector3::UNIT_Y ));
       //snake_cam_node->rotate(Ogre::Quaternion( Ogre::Degree( degree_right ), Ogre::Vector3::UNIT_Y ));
       direction = snake_head_node->getOrientation() * Ogre::Vector3::NEGATIVE_UNIT_Z;
+      
     }else{
       if(left_press){
 	snake_head_node->rotate(Ogre::Quaternion( Ogre::Degree( degree_left ), Ogre::Vector3::UNIT_Y ));
+	//this->m_Camera->rotate(Ogre::Quaternion( Ogre::Degree( degree_left ), Ogre::Vector3::UNIT_Y ));
 	//snake_cam_node->rotate(Ogre::Quaternion( Ogre::Degree( degree_left ), Ogre::Vector3::UNIT_Y ));
         direction = snake_head_node->getOrientation() * Ogre::Vector3::NEGATIVE_UNIT_Z;
       }
     }
+    
     snake_head_node->translate(direction,Ogre::Node::TS_LOCAL);
+    //this->m_Camera->setPosition( Ogre::Vector3( direction.x, direction.y, -direction.z - 30) );
+    //this->m_Camera->lookAt(Ogre::Vector3( direction.x, direction.y, direction.z ));
+    
     //snake_cam_node->translate(direction,Ogre::Node::TS_LOCAL);
     
-  Ogre::LogManager::getSingletonPtr( )->
-    logMessage( "x: " + Ogre::StringConverter::toString(snake_head_node->getPosition().x) + " y: " + Ogre::StringConverter::toString(snake_head_node->getPosition().y) + " z: " + Ogre::StringConverter::toString(snake_head_node->getPosition().z));
+  //Ogre::LogManager::getSingletonPtr( )->
+    //logMessage( "x: " + Ogre::StringConverter::toString(snake_head_node->getPosition().x) + " y: " + Ogre::StringConverter::toString(snake_head_node->getPosition().y) + " z: " + Ogre::StringConverter::toString(snake_head_node->getPosition().z));
   }
   timeDelay = timeDelay + 1;
 //   if( this->pujOgre::Application::frameRenderingQueued( evt ) )

@@ -5,14 +5,15 @@ namespace Ogre
   class OverlaySystem;
 }
 namespace pujOgre{
-class Obstacle{
+class Apple {
 public:
-  Obstacle();
-  Obstacle(std::string name);
-  Obstacle(std::string name,std::string meshFileName,std::string meshName, Ogre::SceneManager* sceneMgr);
+  Apple();
+  Apple(std::string name);
+  Apple(std::string name,std::string meshFileName,std::string meshName, Ogre::SceneManager* sceneMgr);
 private:
-  Ogre::Entity* obstacle;
+  Ogre::Entity* apple;
   std::string name;
+  int score;
 public:
   Ogre::Entity* getEntity();
   void collition(Ogre::Entity objCollider);

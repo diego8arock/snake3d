@@ -5,18 +5,19 @@ pujOgre::Obstacle::Obstacle()
   this->name="";
 }
 
-pujOgre::Obstacle::Obstacle(std::__cxx11::string name)
+pujOgre::Obstacle::Obstacle(std::string name)
 {
   this->name=name;
 }
 
-pujOgre::Obstacle::Obstacle(std::__cxx11::string name, std::__cxx11::string meshFileName,std::string meshName, Ogre::SceneManager sceneMgr)
+pujOgre::Obstacle::Obstacle(std::string name, std::string meshFileName,std::string meshName, Ogre::SceneManager* sceneMgr)
 {
   this->name = name;
-  Ogre::Entity* snake_head =
+  Ogre::Entity* obstacle =
     sceneMgr->createEntity(
       meshName, meshFileName
       );
+  this->obstacle = obstacle;
 }
 
 Ogre::Entity* pujOgre::Obstacle::getEntity()
