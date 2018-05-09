@@ -13,6 +13,7 @@ Snake::Snake(Ogre::SceneManager* scnMgr, bool isHead)
         mNextVerteb = NULL;
         mIsHead = isHead;
         //Creo un nombre para este objeto de forma aleatoria.
+        //TODO
         mName = "vert"+to_string(rand());
         
         //TODO Cambiar el nombre del .mesh para el caso del cuerpo de la serpiente.
@@ -39,6 +40,11 @@ Snake::~Snake()
                 delete mNextVerteb;
         
         delete mNode;
+}
+
+Ogre::SceneNode * Snake::getOgreNode()
+{
+        return mNode;
 }
 
 void Snake::addNewVerteb()
