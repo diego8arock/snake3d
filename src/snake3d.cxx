@@ -42,8 +42,8 @@ protected:
   int timeDelayMax = 150;
   float snake_velocity = 1;
   int game_difficulty = 0;
-  bool right_press = false;
-  bool left_press = false;
+  bool mRightPress = false;
+  bool mLeftPress = false;
   
   //Movement
   float degree_right=-5;
@@ -264,6 +264,11 @@ bool Snake3d::frameRenderingQueued( const Ogre::FrameEvent& evt )
   //SNAKE MOVEMENT
   if(timeDelay==0){
           mSnake->draw();
+
+          if(mRightPress)
+                  mSnake->moveRigth();
+          if(mLeftPress)
+                  mSnake->moveLeft();
           
 //     if(right_press){
 //       snake_head_node->rotate(Ogre::Quaternion( Ogre::Degree( degree_right ), Ogre::Vector3::UNIT_Y ));
@@ -303,6 +308,8 @@ if(arg.key == 0x6A) {
   if(arg.key == OIS::KC_RIGHT) {
 #endif
     mSnake->moveRigth();
+    mRightPress = true;
+    mLeftPress = false;
   }
  
 #ifdef DIEGO_ENV
@@ -311,12 +318,14 @@ if(arg.key == 0x6A) {
   if(arg.key == OIS::KC_LEFT) {
 #endif
     mSnake->moveLeft();
+    mLeftPress = true;
+    mRightPress = false;
   }
 }
 bool Snake3d::keyReleased( const OIS::KeyEvent& arg )
 {
-    right_press = false;
-    left_press = false;
+    mRightPress = false;
+    mLeftPress = false;
 }
 
 // eof - $RCSfile$

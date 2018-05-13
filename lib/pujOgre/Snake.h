@@ -74,6 +74,11 @@ public:
          */
         void draw();
         
+        /**
+         * Retorna el nodo asociado.
+         */
+        Ogre::SceneNode* getOgreNode();
+        
 protected:
         /**
          * Puntero a la siguiente vertebra.
