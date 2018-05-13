@@ -204,11 +204,13 @@ void Snake3d::createScene( )
   apple_node->attachObject( apple );
 //   apple_node->translate( 0, -bbox.getMinimum( )[ 1 ], -20 );
 
-  mSnake = new snake3d::Snake(this->m_SceneMgr,true);
+  mSnake = new snake3d::Snake(this->m_SceneMgr,snake3d::Snake::HEAD);
+  mSnake->addNewVerteb(snake3d::Snake::SPINE);
+  mSnake->addNewVerteb(snake3d::Snake::TAIL);
   
   //Creo 50 vertebras adicionales a la cabeza.
-  for(int i=0; i<50; i++)
-          mSnake->addNewVerteb(); //Este metodo se debe ir llamando cada vez que me coma una manzana en el juego.
+  //for(int i=0; i<50; i++)
+          //mSnake->addNewVerteb(); //Este metodo se debe ir llamando cada vez que me coma una manzana en el juego.
   
  /* // Prepare skeleton to be manually controlled
   Ogre::SkeletonInstance* snake_head_skel = snake_head->getSkeleton( );
@@ -294,11 +296,20 @@ bool Snake3d::frameRenderingQueued( const Ogre::FrameEvent& evt )
 }
 bool Snake3d::keyPressed( const OIS::KeyEvent& arg )
 {
+
+#ifdef DIEGO_ENV
+if(arg.key == 0x6A) { 
+#else
   if(arg.key == OIS::KC_RIGHT) {
+#endif
     mSnake->moveRigth();
   }
-  
+ 
+#ifdef DIEGO_ENV
+  if(arg.key == 0x69) { 
+#else 
   if(arg.key == OIS::KC_LEFT) {
+#endif
     mSnake->moveLeft();
   }
 }

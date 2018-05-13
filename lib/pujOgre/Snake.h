@@ -26,10 +26,16 @@ public:
                 DOWN
         }NextMove;
         
+	typedef enum PartType {
+                HEAD,
+                SPINE,
+                TAIL
+        }PartType;
+	
         /**
          * Constructor.
          */
-        Snake(Ogre::SceneManager* scnMgr, bool isHead=false);
+        Snake(Ogre::SceneManager* scnMgr, PartType partType);
         
         /**
          * Destructor.
@@ -39,7 +45,7 @@ public:
         /**
          * Agrega una nueva vertebra a la serpiente.
          */
-        void addNewVerteb();
+        void addNewVerteb(PartType partType);
         
         /**
          * Direccionar la serpiente a la derecha (RIGHT-KEY)

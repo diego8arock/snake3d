@@ -6,18 +6,31 @@
 #include <string>
 
 namespace snake3d {
+  
 
-Snake::Snake(Ogre::SceneManager* scnMgr, bool isHead)
+
+Snake::Snake(Ogre::SceneManager* scnMgr, PartType partType)
 {
         mSceneMgr = scnMgr;
         mNextVerteb = NULL;
-        mIsHead = isHead;
         //Creo un nombre para este objeto de forma aleatoria.
         mName = "vert"+to_string(rand());
         
         //TODO Cambiar el nombre del .mesh para el caso del cuerpo de la serpiente.
         Ogre::Entity* entity = NULL;
-        entity = mIsHead ? mSceneMgr->createEntity(mName,"snake_head.mesh") : mSceneMgr->createEntity(mName,"snake_head.mesh");
+	
+	switch(partType)
+	{
+	  case HEAD:
+	    entity = mSceneMgr->createEntity(mName,"snake_head.mesh");
+	    break;
+	  case SPINE:
+	    entity = mSceneMgr->createEntity(mName,"snake_body.mesh");
+	    break;
+	  case TAIL:
+	    entity = mSceneMgr->createEntity(mName,"snake_tail.mesh");
+	    break;
+	}
         
         entity->setCastShadows( true );
         
@@ -41,15 +54,15 @@ Snake::~Snake()
         delete mNode;
 }
 
-void Snake::addNewVerteb()
+void Snake::addNewVerteb(PartType partType)
 {
         if(mNextVerteb == NULL) {
-                mNextVerteb = new Snake(mSceneMgr);
+                mNextVerteb = new Snake(mSceneMgr, partType);
                 mNextVerteb->mCurrentPos = mCurrentPos+Ogre::Vector3::UNIT_Z;
                 mNextVerteb->mNextPosition = mNextVerteb->mNode->getOrientation()*Ogre::Vector3::NEGATIVE_UNIT_Z;
                 mNextVerteb->mNode->translate(mNextVerteb->mCurrentPos);
         }else {
-                mNextVerteb->addNewVerteb();
+                mNextVerteb->addNewVerteb(partType);
         }
 }
 
