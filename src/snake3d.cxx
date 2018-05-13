@@ -45,9 +45,10 @@ protected:
   int timeDelayMax = 150;
   float snake_velocity = 1;
   int game_difficulty = 0;
-  bool right_press = false;
-  bool left_press = false;
-  int initial_snake_bone;
+  bool mRightPress = false;
+  bool mLeftPress = false;
+  bool mUpPress = false;
+  bool mDownPress = false;
   
   //Movement
   float degree_right=-5;
@@ -185,8 +186,11 @@ void Snake3d::createScene( )
   apple_node->attachObject( apple );
 //   apple_node->translate( 0, -bbox.getMinimum( )[ 1 ], -20 );
 
-  //CREATE SNAKE
-  mSnake = new snake3d::Snake(this->m_SceneMgr,true);
+  mSnake = new snake3d::Snake(this->m_SceneMgr,snake3d::Snake::HEAD);
+  for(int i=0;i<9;i++){
+    mSnake->addNewVerteb(snake3d::Snake::SPINE);  
+  }
+  mSnake->addNewVerteb(snake3d::Snake::TAIL);
   
   Ogre::SceneNode* snake_cam_node =
   this->m_SceneMgr->getSceneNode("MainCamNode");
@@ -198,19 +202,17 @@ void Snake3d::createScene( )
   Ogre::Vector3 pos = snake_head_node->getPosition();
   
   direction = snake_head_node->getOrientation() * Ogre::Vector3::NEGATIVE_UNIT_Z;
-  
-  //this->m_Camera->setPosition( Ogre::Vector3( direction.x, 6, direction.z + 30) );
+
+  //INITIAL CAM POSITION FPS CAM
   this->m_Camera->setPosition(Ogre::Vector3(pos.x,0,pos.z));
-  //this->m_Camera->lookAt(Ogre::Vector3( direction.x, direction.y-2.5, -direction.z ));
-  //this->m_Camera->lookAt(Ogre::Vector3(direction.x,direction.y-2.5,direction.z));
   
-  snake_cam_node->detachObject(this->m_Camera);
-  snake_head_node->attachObject(this->m_Camera);
-  //snake_head_node->translate( direction.x, 0, direction.z );
+  //UNCOMMET OR COMMENT FOR HAVE A PERSPECTIVE VIEW
+  this->m_Camera->setPosition(Ogre::Vector3(pos.x + 30,10,pos.z-30));
   
-  //Creo 50 vertebras adicionales a la cabeza.
-  for(int i=0; i<10; i++)
-          mSnake->addNewVerteb(); //Este metodo se debe ir llamando cada vez que me coma una manzana en el juego.
+  //UNCOMMET FOR FPS CAM OR COMMENT FOR HAVE A PERSPECTIVE VIEW
+  //snake_cam_node->detachObject(this->m_Camera);
+  //snake_head_node->attachObject(this->m_Camera);
+  
   
  /* // Prepare skeleton to be manually controlled
   Ogre::SkeletonInstance* snake_head_skel = snake_head->getSkeleton( );
@@ -267,67 +269,86 @@ bool Snake3d::frameRenderingQueued( const Ogre::FrameEvent& evt )
       Ogre::Vector3 snake_position = snake_head_node->getPosition();
       Ogre::Vector3 cam_position = snake_cam_node->getPosition();
        
-      //snake_cam_node->translate(direction, Ogre::Node::TS_LOCAL);
-     if(right_press){
+     //SNAKE UP AND DOWN BEHAVIOR
+      if(mRightPress){
        mSnake->moveRigth();
-       this->m_Camera->rotate(Ogre::Quaternion(Ogre::Degree(-10), Ogre::Vector3::UNIT_Y));
+       //UNCOMMET FOR FPS CAM OR COMMENT FOR HAVE A PERSPECTIVE VIEW
+       //this->m_Camera->rotate(Ogre::Quaternion(Ogre::Degree(-10), Ogre::Vector3::UNIT_Y));
      }else{
-       if(left_press){
+       if(mLeftPress){
 	 mSnake->moveLeft();
-	 this->m_Camera->rotate(Ogre::Quaternion(Ogre::Degree(10), Ogre::Vector3::UNIT_Y));
+	 //UNCOMMET FOR FPS CAM OR COMMENT FOR HAVE A PERSPECTIVE VIEW
+	 //this->m_Camera->rotate(Ogre::Quaternion(Ogre::Degree(10), Ogre::Vector3::UNIT_Y));
        }
      }
+     //SNAKE UP AND DOWN BEHAVIOR
+      if(mUpPress){
+	mSnake->moveUp();
+	//UNCOMMET FOR FPS CAM OR COMMENT FOR HAVE A PERSPECTIVE VIEW
+	//this->m_Camera->rotate(Ogre::Quaternion(Ogre::Degree(10), Ogre::Vector3::UNIT_Z));
+	//this->m_Camera->rotate(Ogre::Quaternion(Ogre::Degree(10), Ogre::Vector3::UNIT_X));
+      }else{
+       if(mDownPress){
+	 mSnake->moveDown();
+	 //UNCOMMET FOR FPS CAM OR COMMENT FOR HAVE A PERSPECTIVE VIEW
+	 //this->m_Camera->rotate(Ogre::Quaternion(Ogre::Degree(-10), Ogre::Vector3::UNIT_Z));
+	 //this->m_Camera->rotate(Ogre::Quaternion(Ogre::Degree(-10), Ogre::Vector3::UNIT_X));
+       }
+     }
+  
+  //UNCOMMENT TO HAVE DIFERENT ANGLE OF CAM- COMMENT FOR FPS CAM
+  this->m_Camera->lookAt(snake_position);
   
   Ogre::LogManager::getSingletonPtr()->
     logMessage("snake direction: x:" + to_string(snake_dir.x) + " y:" + to_string(snake_dir.y) + " z:" + to_string(snake_dir.z));
   Ogre::LogManager::getSingletonPtr()->
     logMessage("cam dir: x:" + to_string(cam_dir.x) + " y:" + to_string(cam_dir.y) + " z:" + to_string(cam_dir.z));
-  //this->m_Camera->lookAt(Ogre::Vector3(1000*direction.x,pos.y-10,1000*direction.z));
-  //this->m_Camera->lookAt(pos*direction);
-    
-     //actual direction
-   
-   //snake_cam_node->translate(Ogre::Vector3( direction.x, 6, direction.z + 30));
-   //this->m_Camera->lookAt(Ogre::Vector3( direction.x, direction.y-2.5, -direction.z ));
-//     
-//     snake_head_node->translate(direction,Ogre::Node::TS_LOCAL);
-   //snake_cam_node->lookAt(direction,Ogre::Node::TS_WORLD); 
-   
-    
-    //this->m_Camera->lookAt(Ogre::Vector3( direction.x, direction.y, -direction.z ));
-    
-    //snake_cam_node->translate(direction,Ogre::Node::TS_LOCAL);
-    
-  //Ogre::LogManager::getSingletonPtr( )->
-    //logMessage( "x: " + Ogre::StringConverter::toString(snake_head_node->getPosition().x) + " y: " + Ogre::StringConverter::toString(snake_head_node->getPosition().y) + " z: " + Ogre::StringConverter::toString(snake_head_node->getPosition().z));
+  
   mSnake->draw();
 }
   timeDelay = timeDelay + 1;
-//   if( this->pujOgre::Application::frameRenderingQueued( evt ) )
-//   {
-//     return( true );
-//   }
-//   else
-//     return( false );
-  //CAPTURES
+  
   this->m_Keyboard->capture();
   
   return( true );
 }
 bool Snake3d::keyPressed( const OIS::KeyEvent& arg )
 {
+
+//#ifdef DIEGO_ENV
+//if(arg.key == 0x6A) { 
+//#else
   if(arg.key == OIS::KC_RIGHT) {
-    right_press = true;
+//#endif
+    mRightPress = true;
+    mLeftPress = false;
+  }
+ 
+//#ifdef DIEGO_ENV
+//  if(arg.key == 0x69) { 
+//#else 
+  if(arg.key == OIS::KC_LEFT) {
+//#endif
+    mLeftPress = true;
+    mRightPress = false;
   }
   
-  if(arg.key == OIS::KC_LEFT) {
-    left_press = true;
+  if(arg.key == OIS::KC_UP){
+    mUpPress = true;
+    mDownPress = false;
+  }
+  
+  if(arg.key == OIS::KC_DOWN){
+    mUpPress = false;
+    mDownPress = true;
   }
 }
 bool Snake3d::keyReleased( const OIS::KeyEvent& arg )
 {
-    right_press = false;
-    left_press = false;
+    mRightPress = false;
+    mLeftPress = false;
+    mUpPress = false;
+    mDownPress = false;
 }
 
 // eof - $RCSfile$

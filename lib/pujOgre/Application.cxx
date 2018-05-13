@@ -248,7 +248,7 @@ keyReleased( const OIS::KeyEvent& arg )
   #ifdef ARTURO_ENV
   //evt.type = SDL_KEYUP;
 #else
-  evt.type = KEYUP;
+  evt.type = OgreBites::KEYUP;
   #endif
   evt.keysym.sym = arg.key;
   // evt.keysym.mod = arg.key;

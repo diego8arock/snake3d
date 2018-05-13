@@ -6,22 +6,36 @@
 #include <string>
 
 namespace snake3d {
+  
 
-Snake::Snake(Ogre::SceneManager* scnMgr, bool isHead)
+
+Snake::Snake(Ogre::SceneManager* scnMgr, PartType partType)
 {
         mSceneMgr = scnMgr;
         mNextVerteb = NULL;
-        mIsHead = isHead;
         //Creo un nombre para este objeto de forma aleatoria.
+        //TODO
         mName = "vert"+to_string(rand());
 	//Nombre estático para la cabeza
-	if(isHead){
+	if(partType == snake3d::Snake::HEAD){
 	  mName = "snake_head_node";
 	}
         
         //TODO Cambiar el nombre del .mesh para el caso del cuerpo de la serpiente.
         Ogre::Entity* entity = NULL;
-        entity = mIsHead ? mSceneMgr->createEntity(mName,"snake_head.mesh") : mSceneMgr->createEntity(mName,"snake_head.mesh");
+	
+	switch(partType)
+	{
+	  case HEAD:
+	    entity = mSceneMgr->createEntity(mName,"snake_head.mesh");
+	    break;
+	  case SPINE:
+	    entity = mSceneMgr->createEntity(mName,"snake_body.mesh");
+	    break;
+	  case TAIL:
+	    entity = mSceneMgr->createEntity(mName,"snake_tail.mesh");
+	    break;
+	}
         
         entity->setCastShadows( true );
 	
@@ -46,15 +60,20 @@ Snake::~Snake()
         delete mNode;
 }
 
-void Snake::addNewVerteb()
+Ogre::SceneNode * Snake::getOgreNode()
+{
+        return mNode;
+}
+
+void Snake::addNewVerteb(PartType partType)
 {
         if(mNextVerteb == NULL) {
-                mNextVerteb = new Snake(mSceneMgr);
+                mNextVerteb = new Snake(mSceneMgr, partType);
                 mNextVerteb->mCurrentPos = mCurrentPos+Ogre::Vector3::UNIT_Z;
                 mNextVerteb->mNextPosition = mNextVerteb->mNode->getOrientation()*Ogre::Vector3::NEGATIVE_UNIT_Z;
                 mNextVerteb->mNode->translate(mNextVerteb->mCurrentPos);
         }else {
-                mNextVerteb->addNewVerteb();
+                mNextVerteb->addNewVerteb(partType);
         }
 }
 
@@ -75,6 +94,12 @@ void Snake::draw()
                         case LEFT:
                                 mNextVerteb->moveLeft();
                                 break;
+			case UP:
+				mNextVerteb->moveUp();
+				break;
+			case DOWN:
+				mNextVerteb->moveDown();
+				break;
                         default:
                                 break;
                 }
@@ -102,5 +127,25 @@ void Snake::moveLeft()
         if(mNextVerteb)
                 mNextVerteb->mNextMove = LEFT;
 }
+
+void Snake::moveUp()
+{
+  mNode->rotate(Ogre::Quaternion(Ogre::Degree(10), Ogre::Vector3::UNIT_Z));
+  mNode->rotate(Ogre::Quaternion(Ogre::Degree(10), Ogre::Vector3::UNIT_X));
+  
+  mNextPosition = mNode->getOrientation()*Ogre::Vector3::NEGATIVE_UNIT_Z;
+  if(mNextVerteb)
+                mNextVerteb->mNextMove = UP;
+}
+void Snake::moveDown()
+{
+  mNode->rotate(Ogre::Quaternion(Ogre::Degree(-10), Ogre::Vector3::UNIT_Z));
+  mNode->rotate(Ogre::Quaternion(Ogre::Degree(-10), Ogre::Vector3::UNIT_X));
+  
+  mNextPosition = mNode->getOrientation()*Ogre::Vector3::NEGATIVE_UNIT_Z;
+  if(mNextVerteb)
+                mNextVerteb->mNextMove = DOWN;
+}
+
 
 }//end namespace
