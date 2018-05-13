@@ -5,8 +5,11 @@
 
 #include <OgreException.h>
 #include <OgreFrameListener.h>
+#ifdef ARTURO_ENV
+#include <OgreWindowEventUtilities.h>
+#else
 #include <Bites/OgreWindowEventUtilities.h>
-
+#endif
 #include <OISKeyboard.h>
 #include <OISMouse.h>
 

@@ -1,34 +1,106 @@
-#include <pujOgre/Snake.h>
-#include <list>
+#include "Snake.h"
+#include <OgreSceneManager.h>
+#include <OgreSceneNode.h>
+#include <OgreEntity.h>
+#include <OgreVector3.h>
+#include <string>
 
-pujOgre::Snake::Snake()
+namespace snake3d {
+
+Snake::Snake(Ogre::SceneManager* scnMgr, bool isHead)
 {
-
+        mSceneMgr = scnMgr;
+        mNextVerteb = NULL;
+        mIsHead = isHead;
+        //Creo un nombre para este objeto de forma aleatoria.
+        mName = "vert"+to_string(rand());
+	//Nombre estático para la cabeza
+	if(isHead){
+	  mName = "snake_head_node";
+	}
+        
+        //TODO Cambiar el nombre del .mesh para el caso del cuerpo de la serpiente.
+        Ogre::Entity* entity = NULL;
+        entity = mIsHead ? mSceneMgr->createEntity(mName,"snake_head.mesh") : mSceneMgr->createEntity(mName,"snake_head.mesh");
+        
+        entity->setCastShadows( true );
+	
+        mNode = mSceneMgr->getRootSceneNode( )->createChildSceneNode(mName);
+        mNode->attachObject(entity);
+        
+	
+        //Por defecto se ubica en el centro.
+        Ogre::AxisAlignedBox bbox = entity->getBoundingBox();
+        mCurrentPos = Ogre::Vector3(0,-bbox.getMinimum()[1],0);
+        //mCurrentPos = Ogre::Vector3(0,2,0);
+        mNode->translate(mCurrentPos);
+	mNextPosition = mNode->getOrientation()*Ogre::Vector3::NEGATIVE_UNIT_Z;
+        mNextMove = NONE;
 }
 
-pujOgre::Snake::Snake(std::string meshFileNameHead, std::string meshNameHead, Ogre::SceneManager* sceneMgr, int initialSnakeBone)
+Snake::~Snake()
 {
-  Ogre::Entity* head =
-    sceneMgr->createEntity(
-      meshNameHead, meshFileNameHead
-      );
-  this->head = head;
-  setInitialSnakeBone(initialSnakeBone);
+        if(mNextVerteb)
+                delete mNextVerteb;
+        
+        delete mNode;
 }
 
-void pujOgre::Snake::setInitialSnakeBone(int initialSnakeBone)
+void Snake::addNewVerteb()
 {
-    
+        if(mNextVerteb == NULL) {
+                mNextVerteb = new Snake(mSceneMgr);
+                mNextVerteb->mCurrentPos = mCurrentPos+Ogre::Vector3::UNIT_Z;
+                mNextVerteb->mNextPosition = mNextVerteb->mNode->getOrientation()*Ogre::Vector3::NEGATIVE_UNIT_Z;
+                mNextVerteb->mNode->translate(mNextVerteb->mCurrentPos);
+        }else {
+                mNextVerteb->addNewVerteb();
+        }
 }
 
-void pujOgre::Snake::appendSnakeBone(pujOgre::SnakeBone snakeBone)
+void Snake::draw()
 {
-
+        //Me dibujo a mi mismo
+        mNode->translate(mNextPosition, Ogre::Node::TS_LOCAL);
+        
+        //Si existe una siguiente vertebra. La dibujo.
+        if(mNextVerteb) {
+                //mNextVerteb->mNextPosition = mCurrentPos;
+                mNextVerteb->draw();
+                switch(mNextVerteb->mNextMove)
+                {
+                        case RIGHT:
+                                mNextVerteb->moveRigth();
+                                break;
+                        case LEFT:
+                                mNextVerteb->moveLeft();
+                                break;
+                        default:
+                                break;
+                }
+                mNextVerteb->mNextMove = NONE;
+        }
+        mCurrentPos = mNextPosition;
+        mNextPosition = mNode->getOrientation()*Ogre::Vector3::NEGATIVE_UNIT_Z;
 }
 
-void pujOgre::Snake::destroy()
+void Snake::moveRigth()
 {
-
+        mNode->rotate(Ogre::Quaternion(Ogre::Degree(-10), Ogre::Vector3::UNIT_Y));
+        mNextPosition = mNode->getOrientation()*Ogre::Vector3::NEGATIVE_UNIT_Z;
+        
+        //Inyecto el movimiento a la siguiente vertebra. Se aplicara luego del draw. (delay 1)
+        if(mNextVerteb)
+                mNextVerteb->mNextMove = RIGHT; //Esto aplica luego del siguiente draw
 }
 
+void Snake::moveLeft()
+{
+        mNode->rotate(Ogre::Quaternion(Ogre::Degree(10), Ogre::Vector3::UNIT_Y));
+	
+        mNextPosition = mNode->getOrientation()*Ogre::Vector3::NEGATIVE_UNIT_Z;
+        if(mNextVerteb)
+                mNextVerteb->mNextMove = LEFT;
+}
 
+}//end namespace
