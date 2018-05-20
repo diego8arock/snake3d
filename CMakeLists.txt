@@ -26,7 +26,8 @@ mark_as_advanced(APP_TYPE)
 
 ## == Force c++11
 set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_FLAGS_DEBUG "-g3 -O0 -DDIEGO_ENV")
+set(CMAKE_CXX_FLAGS_DEBUG "-g3 -O0 -DARTURO_ENV")
+#set(CMAKE_CXX_FLAGS_DEBUG "-g3 -O0")
 
 ## == Prepare header generator to build shared libs
 include(GenerateExportHeader)

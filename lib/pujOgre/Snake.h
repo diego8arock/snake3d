@@ -31,9 +31,27 @@ public:
                 SPINE,
                 TAIL
         }PartType;
-	
+        
+private:
+        /**
+         * Indica la cantidad de vertebras que tiene la serpiente.
+         */
+        static const int CANT_VERTEBS_SNAKE=10;
+        
+        /**
+         * Variable que mantiene los indices de las vertebras.
+         */
+        static int VERTEB_INDEX;
+        
+        /**
+         * Indice de la vertebra donde se quiere posicionar la camara.
+         */
+        static const int VERTEB_CAM_NODE_INDEX=3;
+
         /**
          * Constructor.
+         * OJO debe ser privado. La serpiente es un Singleton.
+         * Usar el metodo getSingleton() para obtener el puntero.
          */
         Snake(Ogre::SceneManager* scnMgr, PartType partType);
         
@@ -41,11 +59,12 @@ public:
          * Destructor.
          */
         virtual ~Snake();
+public:
         
         /**
          * Agrega una nueva vertebra a la serpiente.
          */
-        void addNewVerteb(PartType partType);
+        void addNewVerteb();
         
         /**
          * Direccionar la serpiente a la derecha (RIGHT-KEY)
@@ -84,7 +103,28 @@ public:
          */
         Ogre::SceneNode* getOgreNode();
         
+        /**
+         * Retorna el nodo donde se quiere posicionar la camara.
+         */
+        Ogre::SceneNode* getOgreCameraNode();
+        
+        /**
+         * Retorna el singleton a la instancia de la serpiente (cabeza).
+         */
+        static Snake* getSingleton(Ogre::SceneManager* scnMgr);
+        
+        /**
+         * Destruye el singleton.
+         */
+        static void destroySingleton();
+        
 protected:
+        
+        /**
+         * Mantiene la instancia del singleton.
+         */
+        static Snake* mInstance;
+                
         /**
          * Puntero a la siguiente vertebra.
          */
@@ -101,10 +141,18 @@ protected:
         bool mIsHead;
         
         /**
+         * Indica si es la ultima vertebra.
+         */
+        bool mIsTail;
+        
+        /**
          * SceneManager usado para crear los nodos que conforman la serpiente.
          */
         Ogre::SceneManager* mSceneMgr;
         
+        /**
+         * Nodo de ogre asociado a la vertebra.
+         */
         Ogre::SceneNode* mNode;
         
         /**
@@ -117,12 +165,10 @@ protected:
          */
         Ogre::Vector3 mNextPosition;
         
+        /**
+         * Siguiente movimiento a realizar luego del draw.
+         */
         NextMove mNextMove;
-	
-	/**
-	 * Velocidad de girao. La dificultad controla la velocidad de giro de la serpiente
-	 */
-	
 };
 
 }//end namespace
